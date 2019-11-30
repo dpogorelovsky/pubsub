@@ -6,7 +6,7 @@ import "log"
 type Emitter interface {
 	AddSubscriber(string, Subscriber)
 	FireEvent(string, interface{})
-	Stop()
+	Stop(string)
 }
 
 // FiredEvent - fired event structure
@@ -56,10 +56,10 @@ func (e *emitterInstance) run() {
 			{
 				e.handleFiredEvent(event)
 			}
-		case m = <-e.stopSignal:
+		case m := <-e.stopSignal:
 			{
 				log.Printf("Stopping event received: %s", m)
-				e.handleStop()
+				e.handleStop(m)
 				return
 			}
 		}
@@ -86,18 +86,18 @@ func (e *emitterInstance) FireEvent(eventName string, message interface{}) {
 }
 
 // Stop - sends to stopSignal channel
-func (e *emitterInstance) Stop() {
-	e.stopSignal <- "stop event emitter"
+func (e *emitterInstance) Stop(m string) {
+	e.stopSignal <- m
 }
 
 // handleStop - just a wrapper for some logic, not to have it in select{}
 // when stopping emitter we close listening 'stop' and 'event' channels
 // also call Stop() handler on every subscriber
-func (e *emitterInstance) handleStop() {
+func (e *emitterInstance) handleStop(m string) {
 	log.Println("stopping emitter...")
 	for _, event := range e.subscribers {
 		for _, sub := range event {
-			sub.Stop()
+			sub.Stop(m)
 		}
 	}
 	close(e.eventSignal)

@@ -42,11 +42,11 @@ type subscriberInstance struct {
 func (s *subscriberInstance) run() {
 	for {
 		select {
-		case event <- s.eventSignal:
+		case event := <-s.eventSignal:
 			{
 				s.handler.Handle(event)
 			}
-		case m <- s.stopSignal:
+		case m := <-s.stopSignal:
 			{
 				log.Printf("Stopping subscriber: %s", m)
 				close(s.eventSignal)
