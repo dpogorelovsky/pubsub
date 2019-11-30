@@ -56,8 +56,9 @@ func (e *emitterInstance) run() {
 			{
 				e.handleFiredEvent(event)
 			}
-		case _ = <-e.stopSignal:
+		case m = <-e.stopSignal:
 			{
+				log.Printf("Stopping event received: %s", m)
 				e.handleStop()
 				return
 			}
@@ -86,7 +87,7 @@ func (e *emitterInstance) FireEvent(eventName string, message interface{}) {
 
 // Stop - sends to stopSignal channel
 func (e *emitterInstance) Stop() {
-	e.stopSignal <- "stop"
+	e.stopSignal <- "stop event emitter"
 }
 
 // handleStop - just a wrapper for some logic, not to have it in select{}
